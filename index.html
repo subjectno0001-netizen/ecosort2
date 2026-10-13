@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="id" data-tema="merah">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome - EcoSort AI</title>
+  <!-- Pasang tema tersimpan + tentukan apakah intro tampil (sebelum halaman tampil) -->
+  <script>
+    (function () {
+      var d = document.documentElement;
+      var HORMATI_KURANGI_GERAK = true;   // false = intro tetap tampil walau animasi sistem dimatikan
+      var LEWATI_DARI_SCANNER = false;    // true = tanpa intro saat kembali dari halaman scanner
+
+      try {
+        var p = new URLSearchParams(location.search).get("tema");
+        d.dataset.tema = p || localStorage.getItem("tema") || "merah";
+      } catch (e) {}
+
+      var kurangiGerak = HORMATI_KURANGI_GERAK && window.matchMedia &&
+        matchMedia("(prefers-reduced-motion: reduce)").matches;
+      var dariScanner = LEWATI_DARI_SCANNER && /scanner/i.test(document.referrer || "");
+
+      if (kurangiGerak || dariScanner) {
+        d.classList.add("sudah-intro");
+      } else {
+        d.classList.add("intro-aktif");
+        // Pengaman: kalau ada masalah, halaman tetap terbuka
+        setTimeout(function () { d.classList.remove("intro-aktif"); }, 6500);
+      }
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="landing">
+
+  <!-- Intro: tulisan EcoSort AI di atas latar bertema (bisa diklik untuk ganti tema) -->
+  <div id="intro" aria-hidden="true">
+    <div class="intro-isi">
+      <div class="intro-emoji">🌱</div>
+      <div class="intro-teks" title="Klik untuk ganti tema">EcoSort AI</div>
+      <div class="intro-petunjuk">Ketuk tulisan untuk ganti tema</div>
+    </div>
+  </div>
+
+  <div class="bg-layer"></div>
+  <div id="floaters"></div>
+
+  <header class="nav">
+    <div class="brand">🌱 EcoSort AI</div>
+    <nav class="nav-links">
+      <a href="#tujuan">Tujuan</a>
+      <a href="#cara-kerja">Cara Kerja</a>
+    </nav>
+    <div class="nav-right">
+      <div class="tema-switch" aria-label="Pilih tema">
+        <button type="button" class="tema-dot" data-tema="merah" title="Tema merah"></button>
+        <button type="button" class="tema-dot" data-tema="hijau" title="Tema hijau"></button>
+        <button type="button" class="tema-dot" data-tema="pink" title="Tema pink"></button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <h1>Welcome! Pilah sampah dengan <em>cerdas</em> lewat kamera.</h1>
+      <p class="subtitle">
+        Arahkan sampah ke kamera, dan EcoSort AI langsung mengenali jenisnya
+        serta memberi tahu cara membuangnya dengan benar.
+      </p>
+
+      <div class="actions">
+        <a href="scanner.html" class="btn-primary">Buka EcoSort Scanner <span>↗</span></a>
+        <a href="#cara-kerja" class="btn-ghost">Lihat cara kerja</a>
+      </div>
+
+      <div class="badges">
+        <span>🤖 Teachable Machine · TensorFlow.js</span>
+        <span>📱 Jalan di HP &amp; laptop</span>
+      </div>
+    </section>
+
+    <!-- Tujuan -->
+    <section id="tujuan" class="seksi">
+      <h2 class="judul-seksi">Tujuan</h2>
+      <div class="card tujuan-card">
+        <p>
+          EcoSort AI dibuat untuk membantu pekerja yang dipaksa melakukan
+          pemisahan sampah secara manual, pekerjaan yang berisiko terkena
+          penyakit dan tidak manusiawi.
+        </p>
+      </div>
+    </section>
+
+    <!-- Cara Kerja (di bawah Tujuan) -->
+    <section id="cara-kerja" class="seksi">
+      <h2 class="judul-seksi">Cara Kerja</h2>
+      <div class="steps">
+        <div class="card">
+          <h3>1. Nyalakan kamera</h3>
+          <p>Buka halaman scanner lalu izinkan akses kamera.</p>
+        </div>
+        <div class="card">
+          <h3>2. Arahkan sampah</h3>
+          <p>AI mengenali sampah organik, plastik, atau kertas secara langsung.</p>
+        </div>
+        <div class="card">
+          <h3>3. Ikuti saran</h3>
+          <p>Muncul tips singkat cara membuang atau mendaur ulangnya.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="landing.js"></script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id" data-tema="merah">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoSort AI Scanner</title>
+  <!-- Pasang tema tersimpan sebelum halaman tampil (mencegah kedip warna) -->
+  <script>
+    try { document.documentElement.dataset.tema = localStorage.getItem("tema") || "merah"; } catch (e) {}
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="scanner">
+  <div class="bg-layer"></div>
+  <div id="floaters"></div>
+
+  <header class="nav">
+  <div class="brand">🌱 EcoSort AI</div>
+  <nav class="nav-links">
+  </nav>
+  <div class="nav-right">
+    <div class="tema-switch" aria-label="Pilih tema">
+      <button type="button" class="tema-dot" data-tema="merah" title="Tema merah"></button>
+      <button type="button" class="tema-dot" data-tema="hijau" title="Tema hijau"></button>
+      <button type="button" class="tema-dot" data-tema="pink" title="Tema pink"></button>
+    </div>
+    <a href="index.html" class="btn-small">Beranda</a>
+  </div>
+</header>
+
+  <main class="scanner-panel">
+    <h1>EcoSort <em>Scanner</em></h1>
+    <p class="scanner-desc">Nyalakan kamera, lalu arahkan sampah ke dalam bingkai.</p>
+
+    <button type="button" id="btn-start" class="btn-primary" onclick="init()">Nyalakan Kamera</button>
+
+    <div class="scan-area">
+      <div id="cam-box">📷</div>
+      <div id="status" data-kategori="">Kamera belum aktif</div>
+    </div>
+
+    <div id="edukasi"></div>
+
+    <a href="index.html" class="btn-ghost back-link">← Kembali ke Beranda</a>
+  </main>
+
+  <!-- Library Wajib: TensorFlow.js & Teachable Machine -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+  <!-- Script utama scanner (harus setelah library) -->
+  <script src="script.js"></script>
+  <!-- Tema + latar bergerak + objek melayang -->
+  <script src="landing.js"></script>
+</body>
+</html>

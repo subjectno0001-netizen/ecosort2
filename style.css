@@ -1,0 +1,954 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* ===== Daftarkan variabel warna agar bisa berubah halus (animasi) ===== */
+@property --accent      { syntax: "<color>"; inherits: true; initial-value: #e11d2e; }
+@property --accent-2    { syntax: "<color>"; inherits: true; initial-value: #ff4d5e; }
+@property --accent-soft { syntax: "<color>"; inherits: true; initial-value: #ff5d6c; }
+@property --glow        { syntax: "<color>"; inherits: true; initial-value: rgba(225, 29, 46, 0.45); }
+@property --bg-base     { syntax: "<color>"; inherits: true; initial-value: #12030a; }
+@property --text        { syntax: "<color>"; inherits: true; initial-value: #fff1f2; }
+@property --text-soft   { syntax: "<color>"; inherits: true; initial-value: #f0d4d7; }
+@property --text-muted  { syntax: "<color>"; inherits: true; initial-value: #e6c4c8; }
+@property --line        { syntax: "<color>"; inherits: true; initial-value: rgba(255, 120, 120, 0.25); }
+@property --status-bg   { syntax: "<color>"; inherits: true; initial-value: rgba(60, 20, 28, 0.9); }
+
+/* ===== Tema warna ===== */
+:root {
+  --accent: #e11d2e;
+  --accent-2: #ff4d5e;
+  --accent-soft: #ff5d6c;
+  --glow: rgba(225, 29, 46, 0.45);
+  --bg-base: #12030a;
+  --text: #fff1f2;
+  --text-soft: #f0d4d7;
+  --text-muted: #e6c4c8;
+  --line: rgba(255, 120, 120, 0.25);
+  --status-bg: rgba(60, 20, 28, 0.9);
+}
+
+html[data-tema="hijau"] {
+  --accent: #16a34a;
+  --accent-2: #4ade80;
+  --accent-soft: #4ade80;
+  --glow: rgba(22, 163, 74, 0.45);
+  --bg-base: #03120a;
+  --text: #f0fff4;
+  --text-soft: #d4f0dc;
+  --text-muted: #c4e6cd;
+  --line: rgba(120, 255, 160, 0.25);
+  --status-bg: rgba(15, 55, 30, 0.9);
+}
+
+html[data-tema="pink"] {
+  --accent: #ec4899;
+  --accent-2: #f472b6;
+  --accent-soft: #f9a8d4;
+  --glow: rgba(236, 72, 153, 0.45);
+  --bg-base: #14040e;
+  --text: #fff0f7;
+  --text-soft: #f8d4e6;
+  --text-muted: #f0c4dc;
+  --line: rgba(255, 140, 200, 0.3);
+  --status-bg: rgba(60, 15, 45, 0.9);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 90px; /* agar judul tidak tertutup navbar saat lompat ke #tujuan / #cara-kerja */
+  -webkit-text-size-adjust: 100%;
+  /* Perpindahan warna tema yang halus */
+  transition:
+    --accent 0.7s ease,
+    --accent-2 0.7s ease,
+    --accent-soft 0.7s ease,
+    --glow 0.7s ease,
+    --bg-base 0.7s ease,
+    --text 0.7s ease,
+    --text-soft 0.7s ease,
+    --text-muted 0.7s ease,
+    --line 0.7s ease,
+    --status-bg 0.7s ease;
+}
+
+/* ===== Latar bergambar (dipakai landing & scanner) ===== */
+.bg-layer {
+  position: fixed;
+  top: -100px;
+  left: -100px;
+  width: calc(100% + 200px);
+  height: calc(100vh + 200px);   /* cadangan untuk browser lama */
+  height: calc(100lvh + 200px);  /* tinggi layar maksimum: tidak berubah saat bar alamat naik/turun */
+  z-index: -1;
+  overflow: hidden;
+  will-change: transform;
+}
+
+/* Tiga gambar ditumpuk; yang aktif tampil. Elemen dibuat otomatis oleh landing.js */
+.bg-img {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* Yang disembunyikan menunggu gambar baru selesai muncul dulu */
+  transition: opacity 0s linear 0.8s;
+  animation: latar-zoom 2s ease-out backwards;
+}
+
+.bg-merah {
+  background-image:
+    linear-gradient(rgba(18, 3, 8, 0.7), rgba(18, 3, 8, 0.9)),
+    url("https://wallpapercave.com/wp/wp15140256.webp");
+}
+
+.bg-hijau {
+  background-image:
+    linear-gradient(rgba(3, 18, 10, 0.7), rgba(3, 18, 10, 0.9)),
+    url("https://images2.alphacoders.com/130/1309622.jpeg");
+}
+
+.bg-pink {
+  background-image:
+    linear-gradient(rgba(20, 4, 14, 0.7), rgba(20, 4, 14, 0.9)),
+    url("https://wallpapers.com/images/high/oshi-no-ko-stunning-4k-artwork-qm3egi1nyc631p5f.jpg");
+}
+
+html[data-tema="merah"] .bg-merah,
+html[data-tema="hijau"] .bg-hijau,
+html[data-tema="pink"] .bg-pink {
+  opacity: 1;
+  z-index: 1;
+  transition: opacity 0.8s ease;
+}
+
+/* ===== Navbar (sama di landing & scanner, langsung tampil tanpa delay) ===== */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 40px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  backdrop-filter: blur(8px);
+  transition: background 0.4s ease, padding 0.3s ease, box-shadow 0.4s ease;
+}
+
+.nav.scrolled {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  background: rgba(0, 0, 0, 0.55);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+.brand {
+  justify-self: start;
+  font-weight: 700;
+  font-size: 1.15rem;
+}
+
+.nav-links {
+  display: flex;
+  gap: 36px;
+}
+
+.nav-links a {
+  position: relative;
+  color: var(--text-soft);
+  text-decoration: none;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+  transition: color 0.2s;
+}
+
+.nav-links a:hover {
+  color: #fff;
+}
+
+/* Highlight menu sesuai bagian yang sedang dilihat */
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 2px;
+  background: var(--accent-soft);
+  border-radius: 2px;
+  box-shadow: 0 0 10px var(--glow);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.nav-links a.aktif {
+  color: #fff;
+}
+
+.nav-links a.aktif::after {
+  transform: scaleX(1);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.btn-small {
+  padding: 12px 24px;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  background: var(--accent);
+  border-radius: 10px;
+}
+
+/* Pemilih tema */
+.tema-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tema-dot {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+}
+
+.tema-dot:hover {
+  transform: scale(1.15);
+}
+
+.tema-dot[data-tema="merah"] { background: #e11d2e; }
+.tema-dot[data-tema="hijau"] { background: #16a34a; }
+.tema-dot[data-tema="pink"]  { background: #ec4899; }
+
+.tema-dot.aktif {
+  border-color: #fff;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.25);
+}
+
+/* ===== Objek melayang (chibi) ===== */
+#floaters {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  overflow: hidden;
+  animation: fade-masuk 0.6s ease backwards;
+}
+
+.floater {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: auto;
+  cursor: pointer;
+  pointer-events: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+  touch-action: manipulation;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.55));
+  will-change: transform;
+}
+
+/* Gambar chibi tema hijau berupa JPG (tidak transparan), jadi sudutnya dibulatkan */
+html[data-tema="hijau"] .floater {
+  border-radius: 18px;
+}
+
+/* ===== Intro: tulisan EcoSort AI di atas latar bertema ===== */
+html.intro-aktif body {
+  overflow: hidden; /* halaman tidak bisa digulir selama intro */
+}
+
+/* Judul menunggu sampai intro selesai baru beranimasi */
+html.intro-aktif .hero h1,
+html.intro-aktif .subtitle,
+html.intro-aktif .actions,
+html.intro-aktif .badges {
+  animation-play-state: paused;
+}
+
+html.sudah-intro #intro {
+  display: none;
+}
+
+#intro {
+  position: fixed;
+  inset: 0;
+  z-index: 4; /* di bawah navbar (10) dan chibi (5) agar keduanya tetap bisa diklik */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* hanya tulisannya yang bisa diklik */
+  background: rgba(0, 0, 0, 0.4);
+  transition: opacity 0.7s ease;
+  /* Pengaman: kalau JS gagal, intro tetap hilang sendiri */
+  animation: intro-aman 0s linear 7s forwards;
+}
+
+#intro.selesai {
+  opacity: 0;
+}
+
+@keyframes intro-aman {
+  to { visibility: hidden; }
+}
+
+.intro-isi {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 20px;
+  text-align: center;
+  transition: transform 0.7s ease;
+}
+
+#intro.selesai .intro-isi {
+  transform: translateY(-30px) scale(1.04);
+}
+
+/* Cahaya berdenyut di belakang tulisan (warnanya mengikuti tema) */
+.intro-isi::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: -1;
+  width: 80vmin;
+  height: 80vmin;
+  pointer-events: none;
+  background: radial-gradient(circle, var(--glow), transparent 65%);
+  transform: translate(-50%, -50%);
+  animation: intro-napas 3s ease-in-out infinite alternate;
+}
+
+@keyframes intro-napas {
+  from { opacity: 0.5; transform: translate(-50%, -50%) scale(0.9); }
+  to   { opacity: 1;   transform: translate(-50%, -50%) scale(1.1); }
+}
+
+.intro-emoji {
+  font-size: 3rem;
+  animation: intro-pop 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both;
+}
+
+@keyframes intro-pop {
+  from { opacity: 0; transform: scale(0.4) rotate(-20deg); }
+}
+
+/* Tulisan: italic, muncul dari kiri, memudar ke kanan. Bisa diklik untuk ganti tema. */
+.intro-teks {
+  padding: 0.1em 0.35em; /* ruang untuk ujung huruf miring dan cahaya */
+  font-family: "DM Serif Display", serif;
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(3.2rem, 15vw, 8rem);
+  line-height: 1.1;
+  cursor: pointer;
+  pointer-events: auto;
+  text-shadow: 0 0 40px var(--glow), 0 4px 18px rgba(0, 0, 0, 0.6);
+
+  /* Topeng gradasi: kiri jelas, kanan memudar. Geser topeng = efek sapuan. */
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 33.3%, transparent 66.7%);
+  mask-image: linear-gradient(90deg, #000 0%, #000 33.3%, transparent 66.7%);
+  -webkit-mask-size: 300% 100%;
+  mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+
+  animation: intro-sapu 2s cubic-bezier(0.25, 0.7, 0.2, 1) 0.3s both;
+}
+
+@keyframes intro-sapu {
+  from {
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+    transform: translateX(-60px);
+  }
+  to {
+    -webkit-mask-position: 0% 0;
+    mask-position: 0% 0;
+    transform: translateX(0);
+  }
+}
+
+.intro-petunjuk {
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+  animation: intro-naik 0.8s ease 1.8s both;
+}
+
+@keyframes intro-naik {
+  from { opacity: 0; transform: translateY(16px); }
+}
+
+/* ===== Halaman Landing ===== */
+body.landing {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  text-align: left;
+  font-family: "DM Sans", sans-serif;
+  color: var(--text);
+  background: var(--bg-base);
+}
+
+.hero {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 90px 20px 70px;
+  text-align: center;
+}
+
+.hero h1 {
+  font-family: "DM Serif Display", serif;
+  font-weight: 400;
+  font-size: clamp(2.6rem, 8vw, 5.2rem);
+  line-height: 1.1;
+  margin: 0 0 28px;
+  animation: muncul-atas 0.9s ease-out both;
+}
+
+.hero h1 em {
+  font-style: italic;
+  color: var(--accent-soft);
+}
+
+.subtitle {
+  max-width: 620px;
+  margin: 0 auto 40px;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  color: var(--text-soft);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+  animation: muncul-atas 0.9s ease-out 0.2s both;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  animation: muncul-atas 0.9s ease-out 0.4s both;
+}
+
+.btn-primary {
+  display: inline-block;
+  padding: 18px 34px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  text-decoration: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  border-radius: 12px;
+  box-shadow: 0 8px 30px var(--glow);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 36px var(--glow);
+}
+
+.btn-ghost {
+  padding: 18px 34px;
+  font-size: 1.1rem;
+  color: var(--text);
+  text-decoration: none;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  transition: background 0.2s;
+}
+
+.btn-ghost:hover {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+/* Tombol landing: gelap saat diam, bercahaya saat ditekan (scanner tidak berubah) */
+body.landing .btn-primary {
+  background-color: color-mix(in srgb, var(--accent) 40%, #000);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0));
+  color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  transition: background-color 0.6s ease, box-shadow 0.6s ease, color 0.6s ease, transform 0.3s ease;
+}
+
+body.landing .btn-primary:hover {
+  transform: none;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+
+body.landing .btn-primary:active,
+body.landing .btn-primary:focus-visible {
+  background-color: var(--accent);
+  color: #fff;
+  transform: scale(0.97);
+  box-shadow:
+    0 0 18px var(--glow),
+    0 0 42px var(--glow),
+    0 0 70px var(--accent-soft);
+  transition: background-color 0.1s ease, box-shadow 0.1s ease, color 0.1s ease, transform 0.1s ease;
+}
+
+body.landing .btn-ghost {
+  color: rgba(255, 255, 255, 0.75);
+  background: rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  transition: background 0.6s ease, border-color 0.6s ease, box-shadow 0.6s ease, color 0.6s ease, transform 0.3s ease;
+}
+
+body.landing .btn-ghost:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+body.landing .btn-ghost:active,
+body.landing .btn-ghost:focus-visible {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--accent-soft);
+  transform: scale(0.97);
+  box-shadow: 0 0 16px var(--glow), 0 0 36px var(--accent-soft);
+  transition: background 0.1s ease, border-color 0.1s ease, box-shadow 0.1s ease, color 0.1s ease, transform 0.1s ease;
+}
+
+.badges {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 12px 36px;
+  margin-top: 40px;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.8);
+  animation: muncul-atas 0.9s ease-out 0.6s both;
+}
+
+/* Seksi Tujuan & Cara Kerja */
+.seksi {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 20px 30px;
+}
+
+#cara-kerja {
+  padding-bottom: 90px;
+}
+
+.judul-seksi {
+  margin: 0 0 28px;
+  text-align: center;
+  font-family: "DM Serif Display", serif;
+  font-weight: 400;
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.7);
+}
+
+.judul-seksi::after {
+  content: "";
+  display: block;
+  width: 60px;
+  height: 3px;
+  margin: 12px auto 0;
+  background: var(--accent-soft);
+  border-radius: 2px;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.card {
+  padding: 24px;
+  text-align: left;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+}
+
+.card h3 {
+  margin: 0 0 8px;
+  color: var(--accent-soft);
+}
+
+.card p {
+  margin: 0;
+  line-height: 1.6;
+  color: var(--text-soft);
+}
+
+.tujuan-card {
+  padding: 32px 28px;
+  text-align: center;
+  border-left: 4px solid var(--accent);
+}
+
+.tujuan-ikon {
+  margin-bottom: 12px;
+  font-size: 2.2rem;
+}
+
+.tujuan-card p {
+  font-size: 1.15rem;
+  line-height: 1.8;
+  color: var(--text);
+}
+
+/* Kartu muncul pelan saat masuk layar (kelas ditambahkan oleh landing.js) */
+.reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+  transition-delay: var(--delay, 0s);
+}
+
+.reveal.terlihat {
+  opacity: 1;
+  transform: none;
+}
+
+/* ===== Halaman Scanner ===== */
+body.scanner {
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  text-align: center;
+  font-family: "DM Sans", sans-serif;
+  color: var(--text);
+  background: var(--bg-base);
+}
+
+.scanner-panel {
+  max-width: 460px;
+  margin: 40px auto 60px;
+  padding: 36px 28px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: muncul-atas 0.9s ease-out both;
+}
+
+.scanner-panel h1 {
+  font-family: "DM Serif Display", serif;
+  font-weight: 400;
+  font-size: 2.4rem;
+  margin: 0 0 8px;
+}
+
+.scanner-panel h1 em {
+  font-style: italic;
+  color: var(--accent-soft);
+}
+
+.scanner-desc {
+  margin: 0 0 24px;
+  line-height: 1.6;
+  color: var(--text-soft);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+}
+
+.scanner-panel button.btn-primary {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  margin-bottom: 24px;
+}
+
+.scanner-panel button.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: default;
+  transform: none;
+}
+
+.scan-area {
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+#cam-box {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3.5rem;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px dashed var(--line);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+#cam-box.aktif {
+  border: 2px solid var(--accent-soft);
+  animation: denyut 2s ease-in-out infinite alternate;
+}
+
+#cam-box canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+/* Penanda sudut pemindai */
+#cam-box.aktif::before {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  pointer-events: none;
+  border-radius: 14px;
+  background:
+    linear-gradient(var(--accent-soft), var(--accent-soft)) top left / 28px 3px no-repeat,
+    linear-gradient(var(--accent-soft), var(--accent-soft)) top left / 3px 28px no-repeat,
+    linear-gradient(var(--accent-soft), var(--accent-soft)) top right / 28px 3px no-repeat,
+    linear-gradient(var(--accent-soft), var(--accent-soft)) top right / 3px 28px no-repeat,
+    linear-gradient(var(--accent-soft), var(--accent-soft)) bottom left / 28px 3px no-repeat,
+    linear-gradient(var(--accent-soft), var(--accent-soft)) bottom left / 3px 28px no-repeat,
+    linear-gradient(var(--accent-soft), var(--accent-soft)) bottom right / 28px 3px no-repeat,
+    linear-gradient(var(--accent-soft), var(--accent-soft)) bottom right / 3px 28px no-repeat;
+}
+
+@keyframes denyut {
+  from { box-shadow: 0 0 12px var(--glow); }
+  to   { box-shadow: 0 0 32px var(--accent-soft); }
+}
+
+/* Label menempel di bawah kamera */
+#status {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 14px 16px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+  background: var(--status-bg);
+  border: 2px solid var(--line);
+  border-top: none;
+  border-radius: 0 0 20px 20px;
+  transition: background 0.25s, border-color 0.25s;
+}
+
+#status[data-kategori="organik"] {
+  background: #1f7a3a;
+  border-color: #4cd36f;
+}
+
+#status[data-kategori="plastik"] {
+  background: #1c5fa8;
+  border-color: #5aa9ff;
+}
+
+#status[data-kategori="kertas"] {
+  background: #a87a12;
+  border-color: #ffcf5a;
+}
+
+#edukasi {
+  margin-top: 16px;
+  padding: 16px 18px;
+  text-align: left;
+  line-height: 1.6;
+  color: var(--text-soft);
+  background: rgba(255, 255, 255, 0.06);
+  border-left: 4px solid var(--accent);
+  border-radius: 10px;
+}
+
+#edukasi:empty {
+  display: none;
+}
+
+.scanner-panel .back-link {
+  display: inline-block;
+  margin-top: 24px;
+  padding: 12px 24px;
+  font-size: 1rem;
+}
+
+/* ===== Animasi ===== */
+@keyframes muncul-atas {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes latar-zoom {
+  from { transform: scale(1.15); }
+}
+
+@keyframes fade-masuk {
+  from { opacity: 0; }
+}
+
+/* ===== Proteksi dasar: teks tidak bisa diblok, gambar tidak bisa diseret ===== */
+body.landing,
+body.scanner {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* ===== Pengguna yang mematikan animasi: semua langsung tampil ===== */
+@media (prefers-reduced-motion: reduce) {
+  .hero h1, .subtitle, .actions, .badges, .scanner-panel,
+  .bg-img, #floaters, .intro-teks, .intro-emoji, .intro-petunjuk {
+    animation: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+    transition: none;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .bg-img,
+  html[data-tema="merah"] .bg-merah,
+  html[data-tema="hijau"] .bg-hijau,
+  html[data-tema="pink"] .bg-pink {
+    transition: none;
+  }
+
+  .nav {
+    transition: none;
+  }
+}
+
+/* ===== Responsif ===== */
+
+/* Laptop/tablet lebar: menu tengah benar-benar di tengah halaman */
+@media (min-width: 701px) {
+  .nav {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+  }
+
+  .nav-right {
+    justify-self: end;
+  }
+}
+
+@media (max-width: 900px) {
+  .nav { padding: 16px 28px; }
+  .nav-links { gap: 24px; }
+  .hero { padding: 70px 24px 50px; }
+}
+
+@media (max-width: 700px) {
+  html {
+    scroll-padding-top: 120px;
+  }
+
+  .nav {
+    flex-wrap: wrap;
+    row-gap: 8px;
+    padding: 12px 18px;
+  }
+
+  .nav-links {
+    display: flex;
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    gap: 22px;
+    font-size: 0.92rem;
+  }
+
+  .nav-right { gap: 10px; }
+  .brand { font-size: 1.05rem; }
+  .btn-small { padding: 10px 14px; font-size: 0.9rem; }
+
+  .hero { padding: 48px 20px 36px; }
+  .hero h1 { margin-bottom: 20px; }
+  .subtitle { font-size: 1.02rem; margin-bottom: 28px; }
+
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    max-width: 360px;
+    margin: 0 auto;
+  }
+
+  .btn-primary,
+  .btn-ghost {
+    padding: 16px 20px;
+    font-size: 1.02rem;
+    text-align: center;
+  }
+
+  .badges {
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 28px;
+    font-size: 0.9rem;
+  }
+
+  .card { padding: 20px; }
+
+  .scanner-panel {
+    margin: 20px 14px 40px;
+    padding: 26px 18px;
+    border-radius: 16px;
+  }
+
+  .scanner-panel h1 { font-size: 2rem; }
+
+  .scanner-panel button.btn-primary { width: 100%; }
+
+  .scanner-panel .back-link {
+    display: block;
+    text-align: center;
+  }
+}
+
+@media (max-width: 380px) {
+  .hero h1 { font-size: 2.3rem; }
+  .scanner-panel { margin: 14px 10px 30px; padding: 22px 14px; }
+  .scanner-panel h1 { font-size: 1.75rem; }
+}
+
+@media (hover: none) {
+  .btn-primary:hover { transform: none; }
+}
+
+@media (max-height: 500px) {
+  .hero { padding-top: 28px; padding-bottom: 28px; }
+  .scanner-panel { margin-top: 12px; }
+}
